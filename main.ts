@@ -3,6 +3,7 @@ type result = {
   text: string,
   attachments: string[]
 }
+
 function postCrnScheduleAtWeek() {
   var result: result = {
     response_type: "in_channel",
@@ -20,13 +21,14 @@ function postCrnScheduleAtWeek() {
     postMsg("bot", "■定期実行失敗\n送信処理に失敗しました。\nログを確認ください。");
   }
 }
-function commandShowScheduleAtWeek(result: result, date: Date) {
+
+function commandShowScheduleAtWeek(result: result, date: Date): result {
   var events = getScheduleAtWeek(date);
   result.text = fotmatEventList(events);
   return result;
 }
 
-function getScheduleAtWeek(start: Date) {
+function getScheduleAtWeek(start: Date): GoogleAppsScript.Calendar.CalendarEvent[] {
   var calendar = getScheduleCalendar();
 
   var startTime = new Date(start.getFullYear(), start.getMonth(), start.getDate());
@@ -83,7 +85,7 @@ function getYMD(date: GoogleAppsScript.Base.Date): string {
   return date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
 }
 
-function getScheduleCalendar() {
+function getScheduleCalendar(): GoogleAppsScript.Calendar.Calendar {
   var calenderID = PropertiesService.getScriptProperties().getProperty("CALENDER_ID");
   if (calenderID === null) {
     throw new Error("CalendarID is null.");
