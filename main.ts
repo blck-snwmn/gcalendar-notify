@@ -50,7 +50,7 @@ function fotmatEventList(events: GoogleAppsScript.Calendar.CalendarEvent[]): str
 }
 
 function postMsg(baseChannel: string, text: string): GoogleAppsScript.URL_Fetch.HTTPResponse {
-  const TOKEN = PropertiesService.getScriptProperties().getProperty("SLACK_ACCESS_TOKEN");
+  const token = PropertiesService.getScriptProperties().getProperty("SLACK_ACCESS_TOKEN");
   const channel = "#" + baseChannel;
 
   const url = "https://slack.com/api/chat.postMessage";
@@ -59,7 +59,7 @@ function postMsg(baseChannel: string, text: string): GoogleAppsScript.URL_Fetch.
     "text": text
   };
   const headers = {
-    "Authorization": "Bearer " + TOKEN
+    "Authorization": "Bearer " + token
   };
   const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
     "contentType": "application/json; charset=utf-8",
