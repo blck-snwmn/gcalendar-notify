@@ -34,7 +34,6 @@ function getScheduleAtWeek(start: Date): GoogleAppsScript.Calendar.CalendarEvent
 function fotmatEventList(events: GoogleAppsScript.Calendar.CalendarEvent[]): string {
   let dateToTitles = events.reduce((acc: { [key: string]: string }, event) => {
     const ymd = getYMD(event.getStartTime());
-    // const title = "- " + event.getTitle() + "\n"
     const title = `- ${event.getTitle()}\n`
     if (!acc[ymd]) {
       acc[ymd] = "";
