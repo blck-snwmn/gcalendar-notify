@@ -34,7 +34,8 @@ function getScheduleAtWeek(start: Date): GoogleAppsScript.Calendar.CalendarEvent
 function fotmatEventList(events: GoogleAppsScript.Calendar.CalendarEvent[]): string {
   let dateToTitles = events.reduce((acc: { [key: string]: string }, event) => {
     const ymd = getYMD(event.getStartTime());
-    const title = "- " + event.getTitle() + "\n"
+    // const title = "- " + event.getTitle() + "\n"
+    const title = `- ${event.getTitle()}\n`
     if (!acc[ymd]) {
       acc[ymd] = "";
     }
@@ -43,23 +44,22 @@ function fotmatEventList(events: GoogleAppsScript.Calendar.CalendarEvent[]): str
   }, {});
   return Object.keys(dateToTitles).reduce((acc, dateKey) => {
     const titles = dateToTitles[dateKey]
-    const body = "■" + dateKey + "\n" + titles
+    const body = `■${dateKey}\n${titles}`
     acc += body
     return acc
   }, "")
 }
 
-function postMsg(baseChannel: string, text: string): GoogleAppsScript.URL_Fetch.HTTPResponse {
+function postMsg(channel: string, text: string): GoogleAppsScript.URL_Fetch.HTTPResponse {
   const token = PropertiesService.getScriptProperties().getProperty("SLACK_ACCESS_TOKEN");
-  const channel = "#" + baseChannel;
 
   const url = "https://slack.com/api/chat.postMessage";
   const payload = {
-    "channel": channel,
+    "channel": `#${channel}`,
     "text": text
   };
   const headers = {
-    "Authorization": "Bearer " + token
+    "Authorization": `Bearer ${token}`
   };
   const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
     "contentType": "application/json; charset=utf-8",
