@@ -1,20 +1,11 @@
-type result = {
-  response_type: string
-  text: string,
-  attachments: string[]
-}
-
 function postCrnScheduleAtWeek() {
-  var result: result = {
-    response_type: "in_channel",
-    text: "init",
-    attachments: []
-  };
   const date = new Date()
-  result = commandShowScheduleAtWeek(result, date);
-  Logger.log(result.text);
-  const response = postMsg("release_date", result.text);
+  const result = commandShowScheduleAtWeek(date);
+  Logger.log(result);
+
+  const response = postMsg("release_date", result);
   Logger.log(response);
+
   const responseJson = JSON.parse(response.getContentText());
   //  Logger.log(responseJson.ok);
   if (!responseJson.ok) {
@@ -22,10 +13,9 @@ function postCrnScheduleAtWeek() {
   }
 }
 
-function commandShowScheduleAtWeek(result: result, date: Date): result {
+function commandShowScheduleAtWeek(date: Date): string {
   const events = getScheduleAtWeek(date);
-  result.text = fotmatEventList(events);
-  return result;
+  return fotmatEventList(events);
 }
 
 function getScheduleAtWeek(start: Date): GoogleAppsScript.Calendar.CalendarEvent[] {
