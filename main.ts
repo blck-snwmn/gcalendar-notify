@@ -1,5 +1,10 @@
+type result = {
+  response_type: string
+  text: string,
+  attachments: string[]
+}
 function postCrnScheduleAtWeek() {
-  var result = {
+  var result: result = {
     response_type: "in_channel",
     text: "init",
     attachments: []
@@ -9,61 +14,19 @@ function postCrnScheduleAtWeek() {
   Logger.log(result.text);
   var response = postMsg("release_date", result.text);
   Logger.log(response);
-  var responseJson = JSON.parse(response);
+  var responseJson = JSON.parse(response.getContentText());
   //  Logger.log(responseJson.ok);
   if (!responseJson.ok) {
     postMsg("bot", "■定期実行失敗\n送信処理に失敗しました。\nログを確認ください。");
   }
 }
-
-function doPost(e) {
-  if (!validate(e.parameter.token)) {
-    throw new Error("invalid token.");
-  }
-
-  var result = {
-    response_type: "in_channel",
-    text: "init",
-    attachments: []
-  };
-
-  result = executeCommand(e.parameter.command, result);
-
-  var json = JSON.stringify(result);
-  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);
-}
-
-//validate
-function validate(token) {
-  return checkVerificationToken(token);
-}
-//validate check verification token
-function checkVerificationToken(vtoken) {
-  return vtoken === PropertiesService.getScriptProperties().getProperty("VERILICATION_TOKEN");
-}
-
-//execute command
-function executeCommand(command, result) {
-  if (command === "/gasshow") {
-    result = commandTest(result);
-  } else if (command === "/showc") {
-    result = commandShowScheduleAtWeek(result, new Date());
-  }
-  return result;
-}
-//execute command test
-function commandTest(result) {
-  result.text = "gasshow_test";
-  return result;
-}
-
-function commandShowScheduleAtWeek(result, date) {
+function commandShowScheduleAtWeek(result: result, date: Date) {
   var events = getScheduleAtWeek(date);
   result.text = fotmatEventList(events);
   return result;
 }
 
-function getScheduleAtWeek(start) {
+function getScheduleAtWeek(start: Date) {
   var toString = Object.prototype.toString;
   if (toString.call(start) !== "[object Date]") {
     throw new Error("arg type is not Date.");
@@ -80,23 +43,25 @@ function getScheduleAtWeek(start) {
 //- title2
 //■yyyy/mm/dd
 //- title3
-function fotmatEventList(events) {
-  var eventList = [];
-  events.forEach(function (event) {
-    if (!Array.isArray(eventList[getYMD(event.getStartTime())])) {
-      eventList[getYMD(event.getStartTime())] = [];
+function fotmatEventList(events: GoogleAppsScript.Calendar.CalendarEvent[]): string {
+  let dateToTitles = events.reduce((acc: { [key: string]: string }, event) => {
+    const ymd = getYMD(event.getStartTime());
+    const title = "- " + event.getTitle() + "\n"
+    if (!acc[ymd]) {
+      acc[ymd] = "";
     }
-    eventList[getYMD(event.getStartTime())].push(event.getTitle());
-  });
-  return Object.keys(eventList).reduce(function (previousValue, currentValue, index, array) {
-    var nowArray = eventList[currentValue];
-    return previousValue + "■" + currentValue + "\n" + Object.keys(nowArray).reduce(function (pValue, cValue) {
-      return pValue + "- " + nowArray[cValue] + "\n";
-    }, "");
-  }, "");
+    acc[ymd] += title;
+    return acc
+  }, {});
+  return Object.keys(dateToTitles).reduce((acc, dateKey) => {
+    const titles = dateToTitles[dateKey]
+    const body = "■" + dateKey + "\n" + titles
+    acc += body
+    return acc
+  }, "")
 }
 
-function postMsg(baseChannel, text) {
+function postMsg(baseChannel: string, text: string): GoogleAppsScript.URL_Fetch.HTTPResponse {
   var TOKEN = PropertiesService.getScriptProperties().getProperty("SLACK_ACCESS_TOKEN");
   var channel = "#" + baseChannel;
 
@@ -108,17 +73,17 @@ function postMsg(baseChannel, text) {
   var headers = {
     "Authorization": "Bearer " + TOKEN
   };
-  var options = {
+  var options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
     "contentType": "application/json; charset=utf-8",
     "headers": headers,
-    "method": "POST",
+    "method": "post",
     "payload": JSON.stringify(payload)
   };
   var response = UrlFetchApp.fetch(url, options);
   return response;
 }
 
-function getYMD(date) {
+function getYMD(date: GoogleAppsScript.Base.Date) {
   if (date === null || Object.prototype.toString.call(date) !== "[object Date]") {
     throw new Error("date arg is invalid.");
   }
@@ -127,6 +92,9 @@ function getYMD(date) {
 
 function getScheduleCalendar() {
   var calenderID = PropertiesService.getScriptProperties().getProperty("CALENDER_ID");
+  if (calenderID === null) {
+    throw new Error("CalendarID is null.");
+  }
   var calendar = CalendarApp.getCalendarById(calenderID);
   if (calendar === null) {
     throw new Error("Calendar is null.");
