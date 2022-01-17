@@ -27,10 +27,6 @@ function commandShowScheduleAtWeek(result: result, date: Date) {
 }
 
 function getScheduleAtWeek(start: Date) {
-  var toString = Object.prototype.toString;
-  if (toString.call(start) !== "[object Date]") {
-    throw new Error("arg type is not Date.");
-  }
   var calendar = getScheduleCalendar();
 
   var startTime = new Date(start.getFullYear(), start.getMonth(), start.getDate());
@@ -83,10 +79,7 @@ function postMsg(baseChannel: string, text: string): GoogleAppsScript.URL_Fetch.
   return response;
 }
 
-function getYMD(date: GoogleAppsScript.Base.Date) {
-  if (date === null || Object.prototype.toString.call(date) !== "[object Date]") {
-    throw new Error("date arg is invalid.");
-  }
+function getYMD(date: GoogleAppsScript.Base.Date): string {
   return date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
 }
 
